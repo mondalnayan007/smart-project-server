@@ -50,11 +50,42 @@ async function run() {
         res.send(result);
     })
 
+    // post data api
+
     app.post('/products',async(req,res)=>{
         const newProduct = req.body;
         const result = await productsCollection.insertOne(newProduct);
         res.send(result)
     })
+
+
+    // update api 
+
+    app.patch('/products/:id',async(req,res)=>{
+        const id = req.params.id;
+        const query = {_id : new ObjectId(id)};
+        const updatedData = req.body;
+        const update = {
+            $set: {
+                name:updatedData.name,
+                price:updatedData.price
+            }
+        }
+        const result = await productsCollection.updateOne(query,update);
+        res.send(result);
+    })
+
+
+    // delete api 
+
+    app.delete('/products/:id',async(req,res)=>{
+        const id = req.params.id;
+        const query = {_id : new ObjectId(id)}
+        const result = await productsCollection.deleteOne(query);
+        res.send(result);
+    })
+
+
 
 
 

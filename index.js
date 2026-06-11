@@ -1,7 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const port = process.env.PORT || 4000;
 
 const app = express()
@@ -32,6 +32,23 @@ async function run() {
     const db = client.db('smart_db');
     const productsCollection = db.collection('product');
 
+
+    // get all data
+
+    app.get('/products',async(req,res)=>{
+        const cursor = productsCollection.find();
+        const result = await cursor.toArray();
+        res.send(result) ;
+    })
+
+    // get single data
+
+    app.get('/products/:id',async(req,res)=>{
+        const id = req.params.id;
+        const query = {_id: new ObjectId(id)};
+        const result = await productsCollection.findOne(query);
+        res.send(result);
+    })
 
     app.post('/products',async(req,res)=>{
         const newProduct = req.body;

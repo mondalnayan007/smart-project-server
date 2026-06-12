@@ -31,6 +31,7 @@ async function run() {
 
     const db = client.db('smart_db');
     const productsCollection = db.collection('product');
+    const bidsCollection = db.collection('bids');
 
 
     // get all data
@@ -91,6 +92,31 @@ async function run() {
         const query = {_id : new ObjectId(id)}
         const result = await productsCollection.deleteOne(query);
         res.send(result);
+    })
+
+
+    // bids collection apis 
+
+    app.get('/bids',async(req,res)=>{
+           const cursor = bidsCollection.find();
+           const result = await cursor.toArray();
+           res.send(result);
+    })
+
+    // single bids using email query 
+
+    app.get('/bids',async(req,res)=>{
+        const email = req.query.email;
+        const query = {};
+
+        if(email){
+            query.buyer_email= email;
+
+        }
+        const cursor = bidsCollection.find(query);
+        const result = await cursor.toArray();
+        res.send(result) ;
+
     })
 
 

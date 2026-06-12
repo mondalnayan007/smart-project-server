@@ -32,6 +32,14 @@ async function run() {
     const db = client.db('smart_db');
     const productsCollection = db.collection('product');
     const bidsCollection = db.collection('bids');
+    const usersCollection = db.collection('users');
+
+
+    app.post('/users',async(req,res)=>{
+        const newUser = req.body;
+        const result = await usersCollection.insertOne(newUser);
+        res.send(result)
+    })
 
 
     // get all data
@@ -109,6 +117,16 @@ async function run() {
            const result = await cursor.toArray();
            res.send(result);
     })
+  
+    // post api for bids 
+
+    app.post('/bids',async(req,res)=>{
+        const newBids = req.body;
+        const result = await bidsCollection.insertOne(newBids);
+        res.send(result);
+    })
+
+    // delete api for bids 
 
    
 

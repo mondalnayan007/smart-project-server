@@ -2,7 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
-const port = process.env.PORT || 4000;
+const port = process.env.PORT;
 
 const app = express()
 const uri = process.env.MONGO_URI;
@@ -41,6 +41,7 @@ async function run() {
 
         
         const email = req.query.email;
+        console.log('products email:',email);
         const query = {};
         if(email){
             query.email= email;
@@ -95,29 +96,23 @@ async function run() {
     })
 
 
-    // bids collection apis 
+    // bids using email query
 
     app.get('/bids',async(req,res)=>{
-           const cursor = bidsCollection.find();
+           const email = req.query.email;
+           const query = {};
+           if(email){
+            query.buyer_email = email;
+
+           }
+           const cursor = bidsCollection.find(query);
            const result = await cursor.toArray();
            res.send(result);
     })
 
-    // single bids using email query 
+   
 
-    app.get('/bids',async(req,res)=>{
-        const email = req.query.email;
-        const query = {};
-
-        if(email){
-            query.buyer_email= email;
-
-        }
-        const cursor = bidsCollection.find(query);
-        const result = await cursor.toArray();
-        res.send(result) ;
-
-    })
+   
 
 
 

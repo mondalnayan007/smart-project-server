@@ -15,147 +15,157 @@ app.use(express.json());
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
-  serverApi: {
-    version: ServerApiVersion.v1,
-    strict: true,
-    deprecationErrors: true,
-  }
+    serverApi: {
+        version: ServerApiVersion.v1,
+        strict: true,
+        deprecationErrors: true,
+    }
 });
 
 
 
 async function run() {
-  try {
-    // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
+    try {
+        // Connect the client to the server	(optional starting in v4.7)
+        await client.connect();
 
-    const db = client.db('smart_db');
-    const productsCollection = db.collection('product');
-    const bidsCollection = db.collection('bids');
-    const usersCollection = db.collection('users');
-
-
-    app.post('/users',async(req,res)=>{
-        const newUser = req.body;
-        const result = await usersCollection.insertOne(newUser);
-        res.send(result)
-    })
+        const db = client.db('smart_db');
+        const productsCollection = db.collection('product');
+        const bidsCollection = db.collection('bids');
+        const usersCollection = db.collection('users');
 
 
-    // get all data
+        app.post('/users', async (req, res) => {
+            const newUser = req.body;
+            const email = req.body.email;
+            const query = { email: email }
+            const existingUser = await usersCollection.findOne(query);
 
-    app.get('/products',async(req,res)=>{
-        
-
-        
-        const email = req.query.email;
-        console.log('products email:',email);
-        const query = {};
-        if(email){
-            query.email= email;
-        }
-        const cursor = productsCollection.find(query);
-        const result = await cursor.toArray();
-        res.send(result) ;
-    })
-
-    // get single data
-
-    app.get('/products/:id',async(req,res)=>{
-        const id = req.params.id;
-        const query = {_id: new ObjectId(id)};
-        const result = await productsCollection.findOne(query);
-        res.send(result);
-    })
-
-    // post data api
-
-    app.post('/products',async(req,res)=>{
-        const newProduct = req.body;
-        const result = await productsCollection.insertOne(newProduct);
-        res.send(result)
-    })
-
-
-    // update api 
-
-    app.patch('/products/:id',async(req,res)=>{
-        const id = req.params.id;
-        const query = {_id : new ObjectId(id)};
-        const updatedData = req.body;
-        const update = {
-            $set: {
-                name:updatedData.name,
-                price:updatedData.price
+            if (existingUser) {
+                res.send({ message: "user already exist " })
             }
-        }
-        const result = await productsCollection.updateOne(query,update);
-        res.send(result);
-    })
+            else {
+                const result = await usersCollection.insertOne(newUser);
+                res.send(result)
+            }
+
+        })
 
 
-    // delete api 
+        // get all data
 
-    app.delete('/products/:id',async(req,res)=>{
-        const id = req.params.id;
-        const query = {_id : new ObjectId(id)}
-        const result = await productsCollection.deleteOne(query);
-        res.send(result);
-    })
-
-
-    // bids using email query
-
-    app.get('/bids',async(req,res)=>{
-           const email = req.query.email;
-           const query = {};
-           if(email){
-            query.buyer_email = email;
-
-           }
-           const cursor = bidsCollection.find(query);
-           const result = await cursor.toArray();
-           res.send(result);
-    })
-  
-    // post api for bids 
-
-    app.post('/bids',async(req,res)=>{
-        const newBids = req.body;
-        const result = await bidsCollection.insertOne(newBids);
-        res.send(result);
-    })
-
-    // delete api for bids 
-
-   
-
-   
+        app.get('/products', async (req, res) => {
 
 
 
+            const email = req.query.email;
+            console.log('products email:', email);
+            const query = {};
+            if (email) {
+                query.email = email;
+            }
+            const cursor = productsCollection.find(query);
+            const result = await cursor.toArray();
+            res.send(result);
+        })
+
+        // get single data
+
+        app.get('/products/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) };
+            const result = await productsCollection.findOne(query);
+            res.send(result);
+        })
+
+        // post data api
+
+        app.post('/products', async (req, res) => {
+            const newProduct = req.body;
+            const result = await productsCollection.insertOne(newProduct);
+            res.send(result)
+        })
+
+
+        // update api 
+
+        app.patch('/products/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) };
+            const updatedData = req.body;
+            const update = {
+                $set: {
+                    name: updatedData.name,
+                    price: updatedData.price
+                }
+            }
+            const result = await productsCollection.updateOne(query, update);
+            res.send(result);
+        })
+
+
+        // delete api 
+
+        app.delete('/products/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) }
+            const result = await productsCollection.deleteOne(query);
+            res.send(result);
+        })
+
+
+        // bids using email query
+
+        app.get('/bids', async (req, res) => {
+            const email = req.query.email;
+            const query = {};
+            if (email) {
+                query.buyer_email = email;
+
+            }
+            const cursor = bidsCollection.find(query);
+            const result = await cursor.toArray();
+            res.send(result);
+        })
+
+        // post api for bids 
+
+        app.post('/bids', async (req, res) => {
+            const newBids = req.body;
+            const result = await bidsCollection.insertOne(newBids);
+            res.send(result);
+        })
+
+        // delete api for bids 
 
 
 
-    // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
-    console.log("Pinged your deployment. You successfully connected to MongoDB!");
-  } finally {
-    // Ensures that the client will close when you finish/error
-    
-  }
+
+
+
+
+
+
+
+        // Send a ping to confirm a successful connection
+        await client.db("admin").command({ ping: 1 });
+        console.log("Pinged your deployment. You successfully connected to MongoDB!");
+    } finally {
+        // Ensures that the client will close when you finish/error
+
+    }
 }
 run().catch(console.dir);
 
 
 
 
-app.get('/',(req,res)=>{
+app.get('/', (req, res) => {
     res.send("smart server is running")
 });
 
 
 
-app.listen(port,()=>{
+app.listen(port, () => {
     console.log(`Our server is running in ${port}`);
 })

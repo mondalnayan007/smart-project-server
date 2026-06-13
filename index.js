@@ -51,6 +51,12 @@ async function run() {
 
         })
 
+        app.get('/latest-products', async(req,res)=>{
+            const cursor = productsCollection.find().sort({created_at:-1}).limit(6);
+            const result =await cursor.toArray();
+            res.send(result);
+        })
+
 
         // get all data
 

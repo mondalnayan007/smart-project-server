@@ -134,6 +134,15 @@ async function run() {
             res.send(result);
         })
 
+        app.get('/bids/:id',async(req,res)=>{
+            const id = req.params.id;
+            const query = {product: id}
+            const cursor = bidsCollection.find(query).sort({bid_price: -1});
+            const result = await cursor.toArray();
+            res.send(result);
+
+        })
+
         // post api for bids 
 
         app.post('/bids', async (req, res) => {
